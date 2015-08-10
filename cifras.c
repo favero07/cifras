@@ -110,7 +110,7 @@ void transposicao(int k){
 }
  
 void vigenere(char *palavra){
-    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0;
+    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2;
  
     tamanho_chave = strlen(palavra);
     aux_tamanho = tamanho_chave;
@@ -146,21 +146,15 @@ void vigenere(char *palavra){
             palavra[aux_tamanho] = palavra[i];
         }
  
-        // for(i=0;i<tamanho;i++){
-        //  printf("%c",palavra[i]);
-        // }
- 
         //Leitura de Valores
         fseek(arq,0,SEEK_SET);
  
         i=0;
         while(!feof(arq)){
             if((ch = fgetc(arq)) != EOF){
-                // printf("%c",ch);
-                ch = (ch+palavra[i])/256;
-                printf("%c",ch);
+                aux2 = (ch+palavra[i])%256;
+                putc(aux2, arq_cifrado);
                 i++;
-                putc(ch, arq_cifrado);
             }
         }
     }else
@@ -168,7 +162,10 @@ void vigenere(char *palavra){
  
     fclose(arq);
     fclose(arq_cifrado);
- 
+}
+
+void substituicao(){
+    
 }
  
 void decif_caesar(int k){
@@ -267,6 +264,59 @@ void decif_transposicao(int k){
     fclose(arq_cifrado);
 }
  
+void decif_vigenere(char *palavra){
+    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2;
+ 
+    tamanho_chave = strlen(palavra);
+    aux_tamanho = tamanho_chave;
+ 
+    //leitura arquivo com texto
+    FILE *arq = fopen("texto_cifrado_vigenere.txt","r");
+    FILE *arq_decifrado = fopen("texto_decifrado_vigenere.txt","w");
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL){
+        printf("Erro ao abrir arquivo com o texto! (Vgn)\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+ 
+    // Busca tamanho da matriz
+    while(!feof(arq)){
+        // Trocar por codigo que avance posicao
+        if((ch = fgetc(arq)) != EOF){
+            tamanho++;
+        }
+    }
+ 
+    if(tamanho_chave < tamanho){
+        //Ajusta palavra até ficar igual tamanho do texto
+        for(i=0;aux_tamanho < tamanho;i++){
+            aux_tamanho++;
+            if(tamanho_chave == i)
+                i=0;
+            palavra[aux_tamanho] = palavra[i];
+        }
+
+        //Leitura de Valores
+        fseek(arq,0,SEEK_SET);
+ 
+        i=0;
+        while(!feof(arq)){
+            if((ch = fgetc(arq)) != EOF){
+                aux2 = ((ch+256) - palavra[i])%256;
+                putc(aux2, arq_decifrado);
+                i++;
+            }
+        }
+    }else
+        printf("O tamanho da chave não deve ser maior que o texto!\n");
+ 
+    fclose(arq);
+    fclose(arq_decifrado);
+}
  
 void cifrar(int k){
     char palavra[100];
@@ -284,9 +334,14 @@ void cifrar(int k){
 }
  
 void decifrar(int k){
+    char palavra[100];
+
     decif_caesar(k);
     decif_transposicao(k);
-    // decif_vigenere(k);
+
+    printf("Entre com a palavra-chave (Vigenere)\n");
+    scanf("%s",palavra);
+    decif_vigenere(palavra);
     // decif_substituicao(k);
  
     printf("O texto foi decifrado!\nConfira os arquivos de saida!\n\n");
