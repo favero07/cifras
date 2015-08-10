@@ -189,24 +189,24 @@ void substituicao(){
     // }
  
     //Ajusta palavra até ficar igual tamanho do texto
-    for(i=0;aux_tamanho < tamanho;i++){
-        aux_tamanho++;
-        if(tamanho_chave == i)
-            i=0;
-        palavra[aux_tamanho] = palavra[i];
-    }
+    // for(i=0;aux_tamanho < tamanho;i++){
+    //     aux_tamanho++;
+    //     if(tamanho_chave == i)
+    //         i=0;
+    //     palavra[aux_tamanho] = palavra[i];
+    // }
 
     //Leitura de Valores
     fseek(arq,0,SEEK_SET);
 
-    i=0;
-    while(!feof(arq)){
-        if((ch = fgetc(arq)) != EOF){
-            aux2 = (ch+palavra[i])%256;
-            putc(aux2, arq_cifrado);
-            i++;
-        }
-    }
+    // i=0;
+    // while(!feof(arq)){
+    //     if((ch = fgetc(arq)) != EOF){
+    //         aux2 = (ch+palavra[i])%256;
+    //         putc(aux2, arq_cifrado);
+    //         i++;
+    //     }
+    // }
 
     fclose(arq);
     fclose(arq_cifrado);    
