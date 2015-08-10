@@ -165,7 +165,51 @@ void vigenere(char *palavra){
 }
 
 void substituicao(){
-    
+    int ch, i=0, aux2;
+ 
+    //leitura arquivo com texto
+    FILE *arq = fopen("texto.txt","r");
+    FILE *arq_cifrado = fopen("texto_cifrado_substituicao.txt","w");
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL){
+        printf("Erro ao abrir arquivo com o texto! (SB)\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+ 
+    // Busca tamanho da matriz
+    // while(!feof(arq)){
+        // Trocar por codigo que avance posicao
+        // if((ch = fgetc(arq)) != EOF){
+            // tamanho++;
+        // }
+    // }
+ 
+    //Ajusta palavra até ficar igual tamanho do texto
+    for(i=0;aux_tamanho < tamanho;i++){
+        aux_tamanho++;
+        if(tamanho_chave == i)
+            i=0;
+        palavra[aux_tamanho] = palavra[i];
+    }
+
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+
+    i=0;
+    while(!feof(arq)){
+        if((ch = fgetc(arq)) != EOF){
+            aux2 = (ch+palavra[i])%256;
+            putc(aux2, arq_cifrado);
+            i++;
+        }
+    }
+
+    fclose(arq);
+    fclose(arq_cifrado);    
 }
  
 void decif_caesar(int k){
