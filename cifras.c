@@ -164,9 +164,30 @@ void vigenere(char *palavra){
     fclose(arq_cifrado);
 }
 
+typedef struct chaves{
+    char letra;
+    char cifra_letra;
+} TChaves;
+TChaves tabela[255];
+
+#define tamanho_alfabeto 256
+
 void substituicao(){
-    int ch, i=0, aux2;
+    int ch, i=0, aux=0, aux2=0;
  
+    for(i=0;i<tamanho_alfabeto;i++){
+        tabela[i].letra = i;
+    }
+
+    for(i=tamanho_alfabeto;i>0;i--){
+        tabela[aux].cifra_letra = i;
+        aux++;
+    }
+
+    // for(i=0;i<tamanho_alfabeto;i++){
+    //     printf("%d = %d\n",tabela[i].letra,tabela[i].cifra_letra);
+    // }
+
     //leitura arquivo com texto
     FILE *arq = fopen("texto.txt","r");
     FILE *arq_cifrado = fopen("texto_cifrado_substituicao.txt","w");
@@ -179,34 +200,17 @@ void substituicao(){
  
     //Leitura de Valores
     fseek(arq,0,SEEK_SET);
- 
-    // Busca tamanho da matriz
-    // while(!feof(arq)){
-        // Trocar por codigo que avance posicao
-        // if((ch = fgetc(arq)) != EOF){
-            // tamanho++;
-        // }
-    // }
- 
-    //Ajusta palavra até ficar igual tamanho do texto
-    // for(i=0;aux_tamanho < tamanho;i++){
-    //     aux_tamanho++;
-    //     if(tamanho_chave == i)
-    //         i=0;
-    //     palavra[aux_tamanho] = palavra[i];
-    // }
 
-    //Leitura de Valores
-    fseek(arq,0,SEEK_SET);
-
-    // i=0;
-    // while(!feof(arq)){
-    //     if((ch = fgetc(arq)) != EOF){
-    //         aux2 = (ch+palavra[i])%256;
-    //         putc(aux2, arq_cifrado);
-    //         i++;
-    //     }
-    // }
+    aux2=0;
+    while(!feof(arq)){
+        if((ch = fgetc(arq)) != EOF){
+            for(aux2=0; aux2<tamanho_alfabeto; aux2++){
+                if(tabela[aux2].letra == ch)
+                    putc(tabela[aux2].cifra_letra, arq_cifrado);
+            }
+            aux2 = 0;
+        }
+    }
 
     fclose(arq);
     fclose(arq_cifrado);    
@@ -362,6 +366,41 @@ void decif_vigenere(char *palavra){
     fclose(arq_decifrado);
 }
  
+void decif_substituicao(){
+    int ch, i=0, aux=0, aux2=0;
+    char c;
+ 
+    //leitura arquivo com texto
+    FILE *arq = fopen("texto_cifrado_substituicao.txt","r");
+    FILE *arq_decifrado = fopen("texto_decifrado_substituicao.txt","w");
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL){
+        printf("Erro ao abrir arquivo com o texto! (SB)\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+
+    aux2=0;
+    while(!feof(arq)){
+        if((ch = fgetc(arq)) != EOF){
+            c = ch;
+            for(aux2=0; aux2<tamanho_alfabeto; aux2++){
+                if(tabela[aux2].cifra_letra == c){
+                    putc(tabela[aux2].letra, arq_decifrado);
+                }
+            }
+            aux2 = 0;
+        }
+    }
+
+    fclose(arq);
+    fclose(arq_decifrado);    
+}
+
+
 void cifrar(int k){
     char palavra[100];
  
@@ -372,7 +411,7 @@ void cifrar(int k){
     scanf("%s",palavra);
  
     vigenere(palavra);
-    // substituicao(k);
+    substituicao();
      
     printf("O texto foi cifrado!\nConfira os arquivos de saida!\n\n");
 }
@@ -386,7 +425,7 @@ void decifrar(int k){
     printf("Entre com a palavra-chave (Vigenere)\n");
     scanf("%s",palavra);
     decif_vigenere(palavra);
-    // decif_substituicao(k);
+    decif_substituicao(k);
  
     printf("O texto foi decifrado!\nConfira os arquivos de saida!\n\n");
 }
