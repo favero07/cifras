@@ -9,7 +9,7 @@ void caesar(int k){
  
     //leitura arquivo com texto
     FILE *arq = fopen("texto.txt","r");
-    FILE *arq_cifrado = fopen("texto_cifrado_caesar.txt","w+");
+    FILE *arq_cifrado = fopen("texto_cifrado_caesar.dat","wb+");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -23,8 +23,9 @@ void caesar(int k){
     while(!feof(arq)){
         ch = fgetc(arq);
         if(ch != EOF){
-            ch = ch+k;
-            putc(ch, arq_cifrado);
+            ch = (ch+k)%256;
+            // putc(ch, arq_cifrado);
+            fwrite(&ch,1,1,arq_cifrado);    
         }
     }
  
@@ -40,7 +41,7 @@ void transposicao(int k){
  
     //leitura arquivo com texto
     FILE *arq = fopen("texto.txt","r");
-    FILE *arq_cifrado = fopen("texto_cifrado_transposicao.txt","w+");
+    FILE *arq_cifrado = fopen("texto_cifrado_transposicao.dat","wb+");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -82,12 +83,12 @@ void transposicao(int k){
     //Constrói matriz
     while(!feof(arq)){
         for(j=0;j<tamanho;j++){
-            // if(j == tamanho)
-                // k -= aux;
+            if(j == tamanho)
+                k = k - aux;
             // k = (j== tamanho) ? k-aux : k;
             for(i=0;i<k;i++){
                 if((ch = fgetc(arq)) != EOF && matriz[i][j] == '\0'){
-                    matriz[i][j] = ch;
+                    matriz[i][j] = (ch%256);
                 }
                 // cont++;
                 // aux = aux!=0 ? aux-1 : 0;
@@ -100,7 +101,8 @@ void transposicao(int k){
     j=0;
     for(i=0;i<k;i++){
         for(j=0;j<tamanho;j++){
-            putc(matriz[i][j], arq_cifrado);
+            // putc(matriz[i][j], arq_cifrado);
+            fwrite(&matriz[i][j],1,1,arq_cifrado);    
         }
         j=0;
     }
@@ -110,14 +112,14 @@ void transposicao(int k){
 }
  
 void vigenere(char *palavra){
-    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2;
+    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2=0, aux3=0;
  
     tamanho_chave = strlen(palavra);
     aux_tamanho = tamanho_chave;
  
     //leitura arquivo com texto
     FILE *arq = fopen("texto.txt","r");
-    FILE *arq_cifrado = fopen("texto_cifrado_vigenere.txt","w");
+    FILE *arq_cifrado = fopen("texto_cifrado_vigenere.dat","wb");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -152,8 +154,10 @@ void vigenere(char *palavra){
         i=0;
         while(!feof(arq)){
             if((ch = fgetc(arq)) != EOF){
-                aux2 = (ch+palavra[i])%256;
-                putc(aux2, arq_cifrado);
+                aux3 = palavra[i];
+                aux2 = (ch+aux3)%256;
+                fwrite(&aux2,1,1,arq_cifrado);    
+                // putc(aux2, arq_cifrado);
                 i++;
             }
         }
@@ -190,7 +194,7 @@ void substituicao(){
 
     //leitura arquivo com texto
     FILE *arq = fopen("texto.txt","r");
-    FILE *arq_cifrado = fopen("texto_cifrado_substituicao.txt","w");
+    FILE *arq_cifrado = fopen("texto_cifrado_substituicao.dat","wb");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -205,8 +209,11 @@ void substituicao(){
     while(!feof(arq)){
         if((ch = fgetc(arq)) != EOF){
             for(aux2=0; aux2<tamanho_alfabeto; aux2++){
-                if(tabela[aux2].letra == ch)
-                    putc(tabela[aux2].cifra_letra, arq_cifrado);
+                if(tabela[aux2].letra == ch){
+                    tabela[aux2].cifra_letra = tabela[aux2].cifra_letra%256;
+                    fwrite(&tabela[aux2].cifra_letra,1,1,arq_cifrado);    
+                }
+                    // putc(tabela[aux2].cifra_letra, arq_cifrado);
             }
             aux2 = 0;
         }
@@ -217,11 +224,11 @@ void substituicao(){
 }
  
 void decif_caesar(int k){
-    int ch;
+    int ch, c;
  
     //leitura arquivo com texto
-    FILE *arq = fopen("texto_decifrado_caesar.txt","w");
-    FILE *arq_cifrado = fopen("texto_cifrado_caesar.txt","r");
+    FILE *arq = fopen("texto_decifrado_caesar.dat","wb");
+    FILE *arq_cifrado = fopen("texto_cifrado_caesar.dat","rb");
  
     //Caso arquivo esteja vazio
     if(arq_cifrado == NULL){
@@ -234,8 +241,9 @@ void decif_caesar(int k){
  
     while(!feof(arq_cifrado)){
         if((ch = fgetc(arq_cifrado)) != EOF){
-            ch = ch-k;
-            putc(ch, arq);
+            c = (ch-k + 256)%256;
+            fwrite(&c,1,1,arq);  
+            // putc(ch, arq);
         }
     }
  
@@ -248,8 +256,8 @@ void decif_transposicao(int k){
     int tamanho=0, aux=0, i=0, j=0;
  
     //leitura arquivo com texto
-    FILE *arq = fopen("texto_decifrado_transposicao.txt","w");
-    FILE *arq_cifrado = fopen("texto_cifrado_transposicao.txt","r");
+    FILE *arq = fopen("texto_decifrado_transposicao.dat","wb");
+    FILE *arq_cifrado = fopen("texto_cifrado_transposicao.dat","rb");
  
     //Caso arquivo esteja vazio
     if(arq_cifrado == NULL){
@@ -303,7 +311,8 @@ void decif_transposicao(int k){
     j=0;
     for(j=0;j<tamanho;j++){
         for(i=0;i<k;i++){
-            putc(matriz[i][j], arq);
+            fwrite(&matriz[i][j],1,1,arq);    
+            // putc(matriz[i][j], arq);
         }
         i=0;
     }
@@ -313,14 +322,14 @@ void decif_transposicao(int k){
 }
  
 void decif_vigenere(char *palavra){
-    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2;
+    int ch, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2=0, aux3=0;
  
     tamanho_chave = strlen(palavra);
     aux_tamanho = tamanho_chave;
  
     //leitura arquivo com texto
-    FILE *arq = fopen("texto_cifrado_vigenere.txt","r");
-    FILE *arq_decifrado = fopen("texto_decifrado_vigenere.txt","w");
+    FILE *arq = fopen("texto_cifrado_vigenere.dat","rb");
+    FILE *arq_decifrado = fopen("texto_decifrado_vigenere.dat","wb");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -354,8 +363,10 @@ void decif_vigenere(char *palavra){
         i=0;
         while(!feof(arq)){
             if((ch = fgetc(arq)) != EOF){
-                aux2 = ((ch+256) - palavra[i])%256;
-                putc(aux2, arq_decifrado);
+                aux3 = palavra[i];
+                aux2 = ((ch+256) - aux3)%256;
+                fwrite(&aux2,1,1,arq_decifrado);    
+                // putc(aux2, arq_decifrado);
                 i++;
             }
         }
@@ -371,8 +382,8 @@ void decif_substituicao(){
     char c;
  
     //leitura arquivo com texto
-    FILE *arq = fopen("texto_cifrado_substituicao.txt","r");
-    FILE *arq_decifrado = fopen("texto_decifrado_substituicao.txt","w");
+    FILE *arq = fopen("texto_cifrado_substituicao.dat","rb");
+    FILE *arq_decifrado = fopen("texto_decifrado_substituicao.dat","wb");
  
     //Caso arquivo esteja vazio
     if(arq == NULL){
@@ -389,7 +400,9 @@ void decif_substituicao(){
             c = ch;
             for(aux2=0; aux2<tamanho_alfabeto; aux2++){
                 if(tabela[aux2].cifra_letra == c){
-                    putc(tabela[aux2].letra, arq_decifrado);
+                    tabela[aux2].letra = tabela[aux2].letra%256;
+                    fwrite(&tabela[aux2].letra,1,1,arq_decifrado);    
+                    // putc(tabela[aux2].letra, arq_decifrado);
                 }
             }
             aux2 = 0;
