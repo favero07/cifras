@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
  
-void caesar(int k){
+void caesar(){
     int ch, ch2, chave;
  
     ch = ch2 = chave = '\0';
@@ -25,7 +25,7 @@ void caesar(int k){
         ch2 = fgetc(arq_cifrado);
         if(ch != EOF){
             chave = (ch2 - ch + 256) % 256;
-            printf("Chave: %d\n", chave);
+            printf("Chave Ceasar: %d\n", chave);
         }
     }
  
@@ -33,8 +33,8 @@ void caesar(int k){
     fclose(arq_cifrado);
 }
  
-void transposicao(int k){
-    int ch;
+void transposicao(){
+    int ch, k=5;
     int tamanho=0, aux=0, i=0, j=0;
  
     //leitura arquivo com texto
@@ -109,9 +109,8 @@ void transposicao(int k){
     fclose(arq_cifrado);
 }
  
-void vigenere(char *palavra){
-    int ch, ch2, tamanho=0, tamanho_chave=0, aux_tamanho=0, i=0, aux2;
- 
+void vigenere(){
+    int ch, ch2, aux2; 
     ch = ch2 = aux2 = '\0';
 
     //leitura arquivo com texto
@@ -158,19 +157,6 @@ void substituicao(){
 
     ch = ch2 = aux = '\0';
  
-    // for(i=0;i<tamanho_alfabeto;i++){
-    //     tabela[i].letra = i;
-    // }
-
-    // for(i=tamanho_alfabeto;i>0;i--){
-    //     tabela[aux].cifra_letra = i;
-    //     aux++;
-    // }
-
-    // for(i=0;i<tamanho_alfabeto;i++){
-    //     printf("%d = %d\n",tabela[i].letra,tabela[i].cifra_letra);
-    // }
-
     //leitura arquivo com texto
     FILE *arq = fopen("arquivos/inputs/pg74.txt","r");
     FILE *arq_cifrado = fopen("arquivos/outputs/pg74.txt.enc","rb+");
@@ -197,15 +183,9 @@ void substituicao(){
                 fwrite(&tabela[aux2].letra,1,1,arq_dicionario);
                 fwrite(&tabela[aux2].cifra_letra,1,1,arq_dicionario);
             // }
-            // aux2++;
+            //aux2++;
         }
     }
-
-    // aux2 = 0;
-    // for(aux2=0; aux2<tamanho_alfabeto; aux2++){
-    //     fwrite(&tabela[aux2].letra,1,1,arq_dicionario);
-    //     fwrite(&tabela[aux2].cifra_letra,1,1,arq_dicionario);
-    // }
 
     fclose(arq);
     fclose(arq_cifrado);
@@ -367,88 +347,76 @@ void decif_vigenere(char *palavra){
 }
  
 void decif_substituicao(){
-    int ch, i=0, aux=0, aux2=0;
-    char c;
+    int ch, ch_claro, ch_escuro;
+    // char c;
  
     //leitura arquivo com texto
-    FILE *arq = fopen("texto_cifrado_substituicao.dat","rb");
-    FILE *arq_decifrado = fopen("texto_decifrado_substituicao.dat","wb");
+    FILE *arq = fopen("arquivos/outputs/pg74.txt.enc","rb");
+    FILE *arq_dicionario = fopen("arquivos/keys/pg74_substituicao.txt","r");
+    FILE *arq_decifrado = fopen("arquivos/keys/pg74_decifrado_substituicao.txt","w");
  
     //Caso arquivo esteja vazio
-    if(arq == NULL){
+    if(arq == NULL || arq_dicionario == NULL){
         printf("Erro ao abrir arquivo com o texto! (SB)\n\n");
         exit(1);
     }
  
     //Leitura de Valores
     fseek(arq,0,SEEK_SET);
+    fseek(arq_dicionario,0,SEEK_SET);
 
-    aux2=0;
     while(!feof(arq)){
-        if((ch = fgetc(arq)) != EOF){
-            c = ch;
-            for(aux2=0; aux2<tamanho_alfabeto; aux2++){
-                if(tabela[aux2].cifra_letra == c){
-                    tabela[aux2].letra = tabela[aux2].letra%256;
-                    fwrite(&tabela[aux2].letra,1,1,arq_decifrado);    
-                    // putc(tabela[aux2].letra, arq_decifrado);
-                }
+        ch = fgetc(arq);
+        ch_claro = fgetc(arq_dicionario);
+        ch_escuro = fgetc(arq_dicionario);
+        
+        if(ch != EOF){
+           // c = ch;
+            if(ch_escuro == ch){        
+                fwrite(&ch_claro,1,1,arq_decifrado);
+                //putc(ch_claro, arq_decifrado);
             }
-            aux2 = 0;
         }
     }
 
     fclose(arq);
-    fclose(arq_decifrado);    
+    fclose(arq_dicionario);
+    fclose(arq_decifrado);
 }
 
 
-void cifrar(int k){
-    char palavra[100];
- 
-    caesar(k);
-    transposicao(k);
- 
-    printf("Entre com a palavra-chave (Vigenere)\n");
-    scanf("%s",palavra);
- 
-    vigenere(palavra);
+void cifrar(){
+    caesar();
+    transposicao();
+    vigenere();
     substituicao();
      
-    printf("O texto foi cifrado!\nConfira os arquivos de saida!\n\n");
+    printf("Confira os arquivos de saida na pasta keys!\n\n");
 }
  
-void decifrar(int k){
-    char palavra[100];
-
-    decif_caesar(k);
-    decif_transposicao(k);
-
-    printf("Entre com a palavra-chave (Vigenere)\n");
-    scanf("%s",palavra);
-    decif_vigenere(palavra);
-    decif_substituicao(k);
+void decifrar(){
+    // decif_caesar();
+    // decif_transposicao();
+    // decif_vigenere();
+    decif_substituicao();
  
-    printf("O texto foi decifrado!\nConfira os arquivos de saida!\n\n");
+    printf("\nConfira os arquivos de saida!\n\n");
 }
  
 int main(){
-    int k, op=1;
+    int op=1;
  
-    printf("Entre com a chave (Caesar e Transposicao)\n");
-    scanf("%d",&k);
-     
     while(op!=0){
-        printf("Escolha uma opcao abaixo:\n 1-Cifrar\n 2-Decifrar\n 0-Sair\n");
+        printf("Escolha uma opcao abaixo:\n 1-Descobrir chaves/palavras\n 2-Decifrar\n 0-Sair\n");
         scanf("%d",&op);
  
         switch(op){
             case 1:
-                cifrar(k);
+                cifrar();
             break;
  
             case 2:
-                decifrar(k);
+                decifrar();
             break;
         }
     }
