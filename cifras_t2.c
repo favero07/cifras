@@ -32,79 +32,109 @@ void caesar(){
     fclose(arq);
     fclose(arq_cifrado);
 }
+
+typedef struct texto{
+    char letra;
+} TTexto;
+TTexto tentativa[15];
  
 void transposicao(){
-    int ch, k=5;
-    int tamanho=0, aux=0, i=0, j=0;
- 
+    int ch, ch2, k=2, tamanho=0, aux=0, i=0, j=0, aux2=0, flag=0, aux3;
+    char c;
+
     //leitura arquivo com texto
-    FILE *arq = fopen("texto.txt","r");
-    FILE *arq_cifrado = fopen("texto_cifrado_transposicao.dat","wb+");
+    FILE *arq = fopen("arquivos/inputs/pg1661.txt","r");
+    FILE *arq_cifrado = fopen("arquivos/outputs/pg1661.txt.enc","rb");
  
     //Caso arquivo esteja vazio
-    if(arq == NULL){
+    if(arq == NULL || arq_cifrado == NULL){
         printf("Erro ao abrir arquivo com o texto!\n\n");
         exit(1);
     }
  
-    //Leitura de Valores
-    fseek(arq,0,SEEK_SET);
- 
-    // Busca tamanho da matriz
-    while(!feof(arq)){
-        // Trocar por codigo que avance posicao
-        if((ch = fgetc(arq)) != EOF){
-            tamanho++;
-        }
-    }
- 
-    aux = tamanho%k;
-    if(aux != 0)
-        tamanho = ((tamanho+aux)/k);
-    else
-        tamanho = ((tamanho)/k);
- 
-    // Instancia a matriz após encontrar o tamanho
+    tamanho = 15;
     int matriz[k][tamanho];
- 
-    // Inicializa matriz com zeros
-    for(i=0;i<k;i++){
-        for(j=0;j<tamanho;j++){
-            matriz[i][j] = '\0';
-        }
-        j=0;
-    }
- 
-    //Leitura de Valores
-    fseek(arq,0,SEEK_SET);
- 
-    //Constrói matriz
-    while(!feof(arq)){
-        for(j=0;j<tamanho;j++){
-            if(j == tamanho)
-                k = k - aux;
-            // k = (j== tamanho) ? k-aux : k;
-            for(i=0;i<k;i++){
-                if((ch = fgetc(arq)) != EOF && matriz[i][j] == '\0'){
-                    matriz[i][j] = (ch%256);
-                }
-                // cont++;
-                // aux = aux!=0 ? aux-1 : 0;
+    // int lista_claro[tamanho];
+    // int lista_escuro[tamanho];
+    
+    while(flag == 0){
+        //Leitura de Valores
+        fseek(arq,0,SEEK_SET);
+        fseek(arq_cifrado,0,SEEK_SET);
+     
+        // Busca tamanho da matriz
+        // while(!feof(arq)){
+        //     // Trocar por codigo que avance posicao
+        //     if((ch = fgetc(arq)) != EOF){
+        //         tamanho++;
+        //     }
+        // }
+     
+        // aux = tamanho%k;
+        // if(aux != 0)
+        //     tamanho = ((tamanho+aux)/k);
+        // else
+        //     tamanho = ((tamanho)/k);
+     // printf("%d",tamanho);
+     
+         
+        // Inicializa matriz com zeros
+        for(i=0;i<k;i++){
+            for(j=0;j<tamanho;j++){
+                matriz[i][j] = '\0';
             }
-            i=0;
+            j=0;
         }
-    }
- 
-    //Escreve código no arquivo com base nos valores da matriz
-    j=0;
-    for(i=0;i<k;i++){
+     
+        //Leitura de Valores
+        // fseek(arq,0,SEEK_SET);
+     
+        //Constrói matriz
+        j=i=0;
         for(j=0;j<tamanho;j++){
-            // putc(matriz[i][j], arq_cifrado);
-            fwrite(&matriz[i][j],1,1,arq_cifrado);    
+            if(!feof(arq)){
+                // if(j == tamanho)
+                    // k = k - aux;
+                // k = (j== tamanho) ? k-aux : k;
+                for(i=0;i<k;i++){
+                    if((ch = fgetc(arq)) != EOF && matriz[i][j] == '\0'){
+                        matriz[i][j] = (ch + 256) % 256;
+                    }
+                    // cont++;
+                    // aux = aux!=0 ? aux-1 : 0;
+                }
+                i=0;
+            }
+            // break;
         }
-        j=0;
+     
+        //Escreve código no arquivo com base nos valores da matriz
+        j=i=0; aux2=k;
+        for(i=0;i<k;i++){
+            for(j=0;j<tamanho;j++){
+                if(!feof(arq_cifrado)){
+                    if((ch2 = fgetc(arq_cifrado)) != EOF){
+                        aux3 = (ch2 + 256) % 256;
+                        printf("\n%d = %d",matriz[i][j], aux3);
+                        if(matriz[i][j] != aux3){
+                            k++;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(k>aux2)
+                break;
+            j=0;
+        }
+        if(k == aux2)
+            flag = 1;
+
+        // printf("%d\n",k);
     }
- 
+
+    printf("\nChave: %d\n",k);
+
     fclose(arq);
     fclose(arq_cifrado);
 }
@@ -387,7 +417,7 @@ void decif_substituicao(){
 
 void cifrar(){
     caesar();
-    transposicao();
+    // transposicao();
     vigenere();
     substituicao();
      
