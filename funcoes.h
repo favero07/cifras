@@ -514,3 +514,160 @@ void decif_substituicao(){
     fclose(arq_dicionario);
     fclose(arq_decifrado);
 }
+
+int verifica_arquivos_iguais(char *arquivo, char *arquivo2, char *tipo){
+    int ch, ch2;
+ 
+    ch = ch2 = '\0';
+ 
+    //leitura arquivo com texto
+    FILE *arq = fopen(arquivo,tipo);
+    FILE *arq2 = fopen(arquivo2,tipo);
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL || arq2 == NULL){
+        printf("Erro ao abrir arquivo com o texto!\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+    fseek(arq2,0,SEEK_SET);
+ 
+    while(!feof(arq)){
+        ch = fgetc(arq);
+        ch2 = fgetc(arq2);
+        if(ch != EOF && ch2 != EOF){
+            if(ch2 != ch) return 0;
+        }
+    }
+ 
+    fclose(arq);
+    fclose(arq2);
+
+    return 1;
+}
+
+char palavras_dicionario[999999][30];
+int tamanho_dicionario = 0;
+
+void ler_dicionario(char *dicionario){
+    int i, k, aux;
+    char ch;
+
+    i=k=aux=0;
+    ch = '\0';
+ // printf("Chegou aqui1");
+    char palavra_temp[20];
+    // for(aux=0;aux<20;aux++){
+    //     palavra_temp[aux] = '\0';
+    // }
+  // printf("Chegou aqui2");
+    //leitura arquivo com texto
+    FILE *arq = fopen(dicionario,"r");
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL){
+        printf("Erro ao abrir arquivo com o texto!\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+ 
+    while(!feof(arq)){
+        // char palavra_temp[20];
+        for(aux=0;aux<20;aux++){
+            palavra_temp[aux] = '\0';
+        }
+        k=0;
+        while(k<20){
+            ch = fgetc(arq);
+            palavra_temp[k] = ch;
+            // printf("%c %c",ch, palavra_temp[k]);
+            if(ch==' '||ch=='\n'||ch=='\t')
+                break;
+            k++;
+        }
+        strcpy(palavras_dicionario[i], palavra_temp);
+        // printf("%s", palavras_dicionario[i]);
+        i++;
+    }
+    tamanho_dicionario = i;
+ // printf("\n\nChegou aqui");
+    fclose(arq);
+}
+
+int compara_com_dicionario(char *arquivo, char *dicionario){
+    int i = 0, j = 0, k = 0, qt_acertos=0, aux = 0;
+    char ch, ch2;
+    // ch = ch2 = '\0';
+
+    char palavra[20];
+    char *palavra_dic;
+ 
+    //leitura arquivo com texto
+    FILE *arq = fopen(arquivo,"rb");
+    FILE *arq2 = fopen(dicionario,"r");
+ 
+    //Caso arquivo esteja vazio
+    if(arq == NULL || arq2 == NULL){
+        printf("Erro ao abrir arquivo com o texto!\n\n");
+        exit(1);
+    }
+ 
+    //Leitura de Valores
+    fseek(arq,0,SEEK_SET);
+    fseek(arq2,0,SEEK_SET);
+// printf("aqui sm");
+    ler_dicionario(dicionario);
+
+    // for(j=0;j<tamanho_dicionario;j++){
+    //     puts(palavras_dicionario[j]);
+    // }
+ 
+    while(!feof(arq)){
+        
+        // palavra_dic = NULL;
+      
+        // Limpa palavra
+        aux = 0;
+        for(aux=0;aux<20;aux++){
+            palavra[aux] = '\0';
+        }
+
+        // forma palavra do arquivo para comparar com dicionario
+        k=0;
+        while(k<20){
+            ch = fgetc(arq);
+            palavra[k] = ch;
+            if(ch==' '||ch=='\n'||ch=='\t')
+                break;
+            k++;
+        }
+
+        // Verifica se palavra está no dicionario
+        for(i=0;i<tamanho_dicionario;i++){
+            if(strcmp(palavra,palavras_dicionario[i]) == 0){
+                qt_acertos++;
+            }
+        }
+        // while(!feof(arq2)){
+        //     while(1){
+        //         ch2 = fgetc(arq2);
+        //         strcat(palavra_dic, ch2);
+        //         if(ch2==' '||ch2=='\n'||ch2=='\t')
+        //             break;
+        //     }
+
+        //     if(strcmp(palavra,palavra_dic) == 0){
+        //         i++;
+        //     }
+        // }
+    }
+ 
+    fclose(arq);
+    fclose(arq2);
+
+    return qt_acertos;
+}
